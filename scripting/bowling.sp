@@ -1,7 +1,7 @@
 /**
  *		
  *		Bowling Gamemode for Team Fortress 2
- *		https://github.com/TitanTF/Bowling-TF2
+ *		https://github.com/TitanTF/Bowling
  *		
 **/
 
