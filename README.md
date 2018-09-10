@@ -1,6 +1,6 @@
 Bowling Gamemode for Team Fortress 2
 ---
-#### Plugin was made by myst, earlier versions of the map by Brad, rc1 by Sretzo. Originally made for TitanTF.
+#### Plugin made by myst, map rc1 by sretzo and other versions of the map by brad. Originally made for TitanTF.
 - [Release Trailer](https://www.youtube.com/watch?v=kXK2yqUzSo4)
 
 ### Requirements
