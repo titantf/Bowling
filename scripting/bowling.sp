@@ -1217,7 +1217,7 @@ stock void PrintToChat_LeftLane(int iClient, int iLane)
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsValidClient(i))
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == iLane)
-				PrintToChat(i, "\x075885A2%N \x07FFFFFFhas left the iLane.", iClient);
+				PrintToChat(i, "\x075885A2%N \x07FFFFFFhas left the lane.", iClient);
 }
 
 stock void PrintToChat_LaneAnnounce(int iLane, const char[] sText)
