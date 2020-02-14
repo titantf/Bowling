@@ -18,6 +18,27 @@
 - **[TF2 Items Give Weapon](https://forums.alliedmods.net/showthread.php?p=1337899?p=1337899)** for giving weapons
 - **[SteamTools](https://builds.limetech.io/?p=steamtools)** (Optional) to set game description
 
+### Gamemode
+---
+| Term   | Description                                                                                      |
+|--------|--------------------------------------------------------------------------------------------------|
+| Strike | When all 10 pins are knocked down with one ball                                                  |
+| Spare  | All 10 pins are knocked down with 2 consecutive balls                                            |
+| Game   | A game consists of 10 frames per person                                                          |
+| Frame  | A frame consists of up to two deliveries. However the 10th frame consists of up to 3 deliveries. |
+| Double | Occurs when 2 strikes in a row are bowled                                                        |
+| Turkey | Occurs when 3 strikes in a row are bowled                                                        |
+
+### Features
+---
+| Feature            | Description                                                                                                                                                                                                                                                                             |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Lanes              | Every map can only support up to 2 lanes. As each lane has 20 pins each, the maximum number of players per server is 12. Each lane will support 6 players. You can only join a lane while a match is not in progress.                                                                   |
+| Party              | When joining a lane, the match will start after the waiting for players period is over or when everyone in the lane is ready.                                                                                                                                                           |
+| Live Scoreboard    | Scores are tracked throughout a match. The live scores are shown on the right side.                                                                                                                                                                                                     |
+| Strikes and Spares | When a player scores a strike or spare, everyone on the server will be notified!                                                                                                                                                                                                        |
+| Map Support        | We made supporting other bowling maps as easy as possible. Each map needs a configuration of different coordinates such as the where the pins are in each lane, and where the players are teleported to when they play. You can easily get the coordinates with the built-in commands.  |
+
 ### Commands and ConVars
 ---
 
