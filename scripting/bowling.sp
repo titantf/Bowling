@@ -396,7 +396,6 @@ public Action Event_PlayerSpawn(Handle hEvent, const char[] sEventName, bool bDo
 	
 	if (!IsFakeClient(iClient) && GetClientTeam(iClient) == view_as<int>(TFTeam_Red))
 		ChangeClientTeam(iClient, view_as<int>(TFTeam_Blue));
-		
 	else if (IsFakeClient(iClient) && GetClientTeam(iClient) == view_as<int>(TFTeam_Blue))
 		ChangeClientTeam(iClient, view_as<int>(TFTeam_Red));
 		
@@ -404,6 +403,7 @@ public Action Event_PlayerSpawn(Handle hEvent, const char[] sEventName, bool bDo
 	{
 		TF2_AddCondition(iClient, TFCond_MegaHeal, 9999.9);		
 		SetEntityRenderMode(iClient, RENDER_TRANSCOLOR);
+		StripWeapons(iClient);
 	}
 }
 
@@ -993,37 +993,38 @@ public Action Command_Leave(int iClient, int iArgs)
 {
 	if (g_iParty[iClient] != 0)
 	{
-		if (g_iParty[iClient] == 1)
+		if (iClient != g_iCurrentPlayer_Party1 && iClient != g_iCurrentPlayer_Party2)
 		{
-			g_iReady_Party1--;
-			g_iPlayers_Party1--;
+			if (g_iParty[iClient] == 1)
+			{
+				g_iReady_Party1--;
+				g_iPlayers_Party1--;
+				
+				PrintToChat(iClient, "\x07FFFFFFYou left Lane 1.");
+				PrintToChat_LeftLane(iClient, 1);
+				
+				Bowl_UpdateLane(1);
+					
+				g_iReady[iClient] = 0;
+				g_iParty[iClient] = 0;
+				g_iScore[iClient] = 0;
+			}
 			
-			PrintToChat(iClient, "\x07FFFFFFYou left Lane 1.");
-			PrintToChat_LeftLane(iClient, 1);
-			
-			Bowl_UpdateLane(1);
-			
-			if (iClient == g_iCurrentPlayer_Party1)
-				Bowl_RemovePlayer(iClient);
+			else
+			{
+				g_iReady_Party2--;
+				g_iPlayers_Party2--;
+				
+				PrintToChat(iClient, "\x07FFFFFFYou left Lane 2.");
+				PrintToChat_LeftLane(iClient, 2);
+				
+				Bowl_UpdateLane(2);
+					
+				g_iReady[iClient] = 0;
+				g_iParty[iClient] = 0;
+				g_iScore[iClient] = 0;
+			}
 		}
-		
-		else
-		{
-			g_iReady_Party2--;
-			g_iPlayers_Party2--;
-			
-			PrintToChat(iClient, "\x07FFFFFFYou left Lane 2.");
-			PrintToChat_LeftLane(iClient, 2);
-			
-			Bowl_UpdateLane(2);
-			
-			if (iClient == g_iCurrentPlayer_Party2)
-				Bowl_RemovePlayer(iClient);
-		}
-		
-		g_iReady[iClient] = 0;
-		g_iParty[iClient] = 0;
-		g_iScore[iClient] = 0;
 	}
 	
 	else
@@ -1040,7 +1041,7 @@ public void OnGameFrame()
 		else
 		{
 			g_bPlayerSelected_Lane1 = true;
-			Bowl_EndSession(1);
+			CreateTimer(3.0, Bowl_EndSession, 1, TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
 	
@@ -1052,7 +1053,7 @@ public void OnGameFrame()
 		else
 		{
 			g_bPlayerSelected_Lane2 = true;
-			Bowl_EndSession(2);
+			CreateTimer(3.0, Bowl_EndSession, 2, TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
 	
@@ -1455,7 +1456,7 @@ stock void Bowl_GiveLooseCannon(int iClient, int iFrame)
 				int iAmmoTable = FindSendPropInfo("CTFWeaponBase", "m_iClip1");
 				SetEntData(iWeapon, iAmmoTable, 3, 4, true);
 				
-				PrintToChat(iClient, "\x07FFFFFFIt's the last frame! You get 3 bowls.");
+				PrintToChat(iClient, "\x07FFFFFFIt's the last frame! You get up to 3 bowls.");
 			}
 			
 			else
@@ -1463,7 +1464,7 @@ stock void Bowl_GiveLooseCannon(int iClient, int iFrame)
 				int iAmmoTable = FindSendPropInfo("CTFWeaponBase", "m_iClip1");
 				SetEntData(iWeapon, iAmmoTable, 2, 4, true);
 				
-				PrintToChat(iClient, "\x07FFFFFFIt's your turn! You get 2 bowls.");
+				PrintToChat(iClient, "\x07FFFFFFIt's your turn! You get up to 2 bowls.");
 			}
 			
 			int iOffset = GetEntProp(iWeapon, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
@@ -1534,11 +1535,11 @@ public Action Bowl_TeleportOutside(Handle hTimer, int iClient)
 		flPos[2] = g_sLane2_ExitPos[2];
 	}
 	
-	if (!IsPlayerAlive(iClient))
-		TF2_RespawnPlayer(iClient);
-		
-	TeleportEntity(iClient, flPos, NULL_VECTOR, NULL_VECTOR);
-	TF2_RegeneratePlayer(iClient);
+	if (IsPlayerAlive(iClient))
+	{
+		TeleportEntity(iClient, flPos, NULL_VECTOR, NULL_VECTOR);
+		TF2_RegeneratePlayer(iClient);
+	}
 	
 	SetEntProp(iClient, Prop_Send, "m_bDrawViewmodel", 1);
 	if (IsFlagSet(iClient, HIDEHUD_HEALTH))
@@ -1609,7 +1610,7 @@ stock void Bowl_ResetPlayer(int iClient)
 		Bowl_RemovePlayer(iClient);
 }
 
-stock void Bowl_EndSession(int iLane)
+public Action Bowl_EndSession(Handle hTimer, int iLane)
 {
 	switch (iLane)
 	{
@@ -1748,7 +1749,7 @@ stock void Bowl_EndSession(int iLane)
 
 stock void Bowl_ConnectPins()
 {	
-	ServerCommand("sv_cheats 1; bot -team red -class medic -name Pin#1; bot -team red -class medic -name Pin#2; bot -team red -class medic -name Pin#3; bot -team red -class medic -name Pin#4; bot -team red -class medic -name Pin#5; bot -team red -class medic -name Pin#6;");
+	ServerCommand("sv_cheats 1; bot kick all; bot -team red -class medic -name Pin#1; bot -team red -class medic -name Pin#2; bot -team red -class medic -name Pin#3; bot -team red -class medic -name Pin#4; bot -team red -class medic -name Pin#5; bot -team red -class medic -name Pin#6;");
 	ServerCommand("bot -team red -class medic -name Pin#7; bot -team red -class medic -name Pin#8; bot -team red -class medic -name Pin#9; bot -team red -class medic -name Pin#10");
 	
 	ServerCommand("bot -team red -class medic -name Pin#11; bot -team red -class medic -name Pin#12; bot -team red -class medic -name Pin#13; bot -team red -class medic -name Pin#14; bot -team red -class medic -name Pin#15; bot -team red -class medic -name Pin#16;");
