@@ -1,5 +1,5 @@
 #### Plugin made by myst, map rc1 by Sretzo and other versions of the map by Brad. Originally made for TitanTF.
-- [Release Trailer](https://www.youtube.com/watch?v=kXK2yqUzSo4)
+- [Release Trailer](https://www.youtube.com/watch?v=kXK2yqUzSo4) (map shown is different from current version)
 
 ### Requirements
 ---
