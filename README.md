@@ -1,5 +1,5 @@
 #### Originally made for Titan.TF
-- [Release Trailer](https://www.youtube.com/watch?v=kXK2yqUzSo4) (map shown is different from current version)
+- [Release Trailer](https://www.youtube.com/watch?v=kXK2yqUzSo4) (map shown is an older version of bowl_alley)
 
 ### Credits
 - Developed by myst
