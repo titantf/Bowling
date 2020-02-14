@@ -18,6 +18,8 @@
 - **[TF2 Items Give Weapon](https://forums.alliedmods.net/showthread.php?p=1337899?p=1337899)** for giving weapons
 - **[SteamTools](https://builds.limetech.io/?p=steamtools)** (Optional) to set game description
 
+### Commands and ConVars
+---
 
 ### Public Commands
 | Command                                     | Description                               | Parameters                             |
