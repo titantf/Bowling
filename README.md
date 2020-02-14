@@ -18,6 +18,28 @@
 - **[TF2 Items Give Weapon](https://forums.alliedmods.net/showthread.php?p=1337899?p=1337899)** for giving weapons
 - **[SteamTools](https://builds.limetech.io/?p=steamtools)** (Optional) to set game description
 
+
+### Public Commands
+| Command                                     | Description                               | Parameters                             |
+|---------------------------------------------|-------------------------------------------|----------------------------------------|
+| `sm_bhelp`                                  | Get information for the bowling gamemode. | -                                      |
+| `sm_join`, `sm_lane`, `sm_lanes`, `sm_bowl` | Opens the lane selection menu.            | `<lane_number>` to join a lane |
+| `sm_r`, `sm_ready`                          | Ready up while in a lane.                 | -                                      |
+| `sm_leave`                                  | Leave a lane.                             | -                                      |
+
+### Admin Commands
+| Command       | Description                                                                                                                    | Parameters |
+|---------------|--------------------------------------------------------------------------------------------------------------------------------|------------|
+| `sm_teleport` | Used to teleport a player to where you are pointing at. Use this to setup your pins.                                           | -          |
+| `sm_getpos`   | Used to print the coordinates of all pins from either lanne 1 or 2. Use this after setting up the positions using sm_teleport. | -          |
+
+### ConVars
+| ConVar               | Description                                                                             | Default Value | Minimum Value | Maximum Value |
+|----------------------|-----------------------------------------------------------------------------------------|---------------|---------------|---------------|
+| `bowling_maxplayers` | Sets the maximum players per lane.                                                      | 6             | 1             | 1             |
+| `bowling_wfp_time`   | Sets the maximum waiting for players time.                                              | 120           | 10            | 600           |
+| `bowling_roll_time`  | Sets the maximum time allowed for players to roll their ball. Prevents a troll delaying | 10            | 50            | 60            |
+
 ### Map Configuration
 ---
 Use the built in commands sm_teleport and sm_getpos to help you get the coordinates.
@@ -167,24 +189,3 @@ Use the built in commands sm_teleport and sm_getpos to help you get the coordina
 	}
 }
 ```
-
-### Public Commands
-| Command                                     | Description                               | Parameters                             |
-|---------------------------------------------|-------------------------------------------|----------------------------------------|
-| `sm_bhelp`                                  | Get information for the bowling gamemode. | -                                      |
-| `sm_join`, `sm_lane`, `sm_lanes`, `sm_bowl` | Opens the lane selection menu.            | `<lane_number>` to join a lane |
-| `sm_r`, `sm_ready`                          | Ready up while in a lane.                 | -                                      |
-| `sm_leave`                                  | Leave a lane.                             | -                                      |
-
-### Admin Commands
-| Command       | Description                                                                                                                    | Parameters |
-|---------------|--------------------------------------------------------------------------------------------------------------------------------|------------|
-| `sm_teleport` | Used to teleport a player to where you are pointing at. Use this to setup your pins.                                           | -          |
-| `sm_getpos`   | Used to print the coordinates of all pins from either lanne 1 or 2. Use this after setting up the positions using sm_teleport. | -          |
-
-### ConVars
-| ConVar               | Description                                                                             | Default Value | Minimum Value | Maximum Value |
-|----------------------|-----------------------------------------------------------------------------------------|---------------|---------------|---------------|
-| `bowling_maxplayers` | Sets the maximum players per lane.                                                      | 6             | 1             | 1             |
-| `bowling_wfp_time`   | Sets the maximum waiting for players time.                                              | 120           | 10            | 600           |
-| `bowling_roll_time`  | Sets the maximum time allowed for players to roll their ball. Prevents a troll delaying | 10            | 50            | 60            |
