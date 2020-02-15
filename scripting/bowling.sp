@@ -1210,7 +1210,7 @@ stock void Bowl_RemovePlayer(int iClient)
 		if (g_iStrikes[iClient] + 1 < g_iInactiveStrikes)
 		{
 			g_iStrikes[iClient]++;
-			PrintToChat(iClient, "\x07FF4040You did not roll this round. You will be kicked from this lane if you idle for %i more frames.", g_iInactiveStrikes - g_iStrikes[iClient]);
+			PrintToChat(iClient, "\x07FF4040You did not roll this round. You will be kicked from this lane if you idle for %i more frame%s.", g_iInactiveStrikes - g_iStrikes[iClient], (g_iInactiveStrikes - g_iStrikes[iClient] > 1) ? "s" : "");
 		}
 		
 		else
