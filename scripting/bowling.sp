@@ -1114,6 +1114,7 @@ public Action Command_Leave(int iClient, int iArgs)
 				g_iReady[iClient] = 0;
 				g_iParty[iClient] = 0;
 				g_iScore[iClient] = 0;
+				g_iStrikes[iClient] = 0;
 			}
 			
 			else
@@ -1129,6 +1130,7 @@ public Action Command_Leave(int iClient, int iArgs)
 				g_iReady[iClient] = 0;
 				g_iParty[iClient] = 0;
 				g_iScore[iClient] = 0;
+				g_iStrikes[iClient] = 0;
 			}
 		}
 	}
@@ -1207,9 +1209,9 @@ stock void Bowl_RemovePlayer(int iClient)
 	
 	if (GetEntProp(GetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1") >= 2)
 	{
-		if (g_iStrikes[iClient] + 1 < g_iInactiveStrikes)
+		g_iStrikes[iClient]++;
+		if (g_iStrikes[iClient] < g_iInactiveStrikes)
 		{
-			g_iStrikes[iClient]++;
 			PrintToChat(iClient, "\x07FF4040You did not roll this round. You will be kicked from this lane if you idle for %i more frame%s.", g_iInactiveStrikes - g_iStrikes[iClient], (g_iInactiveStrikes - g_iStrikes[iClient] > 1) ? "s" : "");
 		}
 		
@@ -1337,9 +1339,18 @@ stock void PrintToChat_JoinLane(int iClient, int iLane)
 stock void PrintToChat_LeftLane(int iClient, int iLane)
 {
 	for (int i = 1; i <= MaxClients; i++)
+	{
 		if (IsValidClient(i))
+		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == iLane)
-				PrintToChat(i, "\x075885A2%N \x07FFFFFFhas left the lane.", iClient);
+			{
+				if (g_iStrikes[iClient] >= g_iInactiveStrikes)
+					PrintToChat(i, "\x075885A2%N \x07FFFFFFhas been kicked from the lane due to inactivity.", iClient);
+				else
+					PrintToChat(i, "\x075885A2%N \x07FFFFFFhas left the lane.", iClient);
+			}
+		}
+	}
 }
 
 stock void PrintToChat_LaneAnnounce(int iLane, const char[] sText)
@@ -1589,7 +1600,6 @@ stock void Bowl_GiveLooseCannon(int iClient, int iFrame)
 		if (IsValidEntity(iWeapon))
 		{
 			SetEntProp(iClient, Prop_Send, "m_bDrawViewmodel", 0);
-			
 			if (iFrame == 10)
 			{
 				int iAmmoTable = FindSendPropInfo("CTFWeaponBase", "m_iClip1");
@@ -1606,6 +1616,9 @@ stock void Bowl_GiveLooseCannon(int iClient, int iFrame)
 				PrintToChat(iClient, "\x07FFFFFFIt's your turn! You get up to 2 bowls.");
 			}
 			
+			if (g_iStrikes[iClient] + 1 >= g_iInactiveStrikes)
+				PrintToChat(iClient, "\x07FF4040You will be kicked from this lane if you do not roll.");
+				
 			int iOffset = GetEntProp(iWeapon, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
 			int iAmmoTable = FindSendPropInfo("CTFPlayer", "m_iAmmo");
 			SetEntData(iClient, iAmmoTable+iOffset, 0, 4, true);
