@@ -42,7 +42,8 @@ bool bSteamTools;
 ConVar
 	g_cvMaxPlayers,
 	g_cvWFP_Time,
-	g_cvRoll_Time;
+	g_cvRoll_Time,
+	g_cvInactive_Strikes;
 	
 Handle
 	g_hHud_Party1,
@@ -60,6 +61,7 @@ int
 	g_iMaxPlayers,
 	g_iWaitingForPlayers,
 	g_iRollTime,
+	g_iInactiveStrikes,
 	
 	g_iAlpha = 255,
 	
@@ -81,7 +83,9 @@ int
 	g_iScore[MAXPLAYERS+1] = 0,
 	
 	g_iParty[MAXPLAYERS+1] = 0,
-	g_iReady[MAXPLAYERS+1] = 0;
+	g_iReady[MAXPLAYERS+1] = 0,
+	
+	g_iStrikes[MAXPLAYERS+1];
 	
 float
 	g_sLane1_PlayingPos[3],
@@ -158,14 +162,17 @@ public void OnPluginStart()
 	g_cvMaxPlayers = CreateConVar("bowling_maxplayers", "6", "Sets the maximum players per lane.", FCVAR_NOTIFY, true, 1.0, true, 6.0);
 	g_cvWFP_Time = CreateConVar("bowling_wfp_time", "120", "Sets the maximum waiting for players time.", FCVAR_NOTIFY, true, 10.0, true, 600.0);
 	g_cvRoll_Time = CreateConVar("bowling_roll_time", "10", "Sets the maximum time allowed for players to roll their ball. Prevents a troll delaying.", FCVAR_NOTIFY, true, 5.0, true, 60.0);
+	g_cvInactive_Strikes = CreateConVar("bowling_inactive_strikes", "3", "Sets the number of inactive strikes before the player is kicked from idling.", FCVAR_NOTIFY, true, 1.0, true, 10.0);
 	
 	HookConVarChange(g_cvMaxPlayers, ConvarChanged_MaxPlayers);
 	HookConVarChange(g_cvWFP_Time, ConvarChanged_WFP_Time);
 	HookConVarChange(g_cvRoll_Time, ConvarChanged_Roll_Time);
+	HookConVarChange(g_cvInactive_Strikes, ConvarChanged_Inactive_Strikes);
 	
 	g_iMaxPlayers = GetConVarInt(g_cvMaxPlayers);
 	g_iWaitingForPlayers = GetConVarInt(g_cvWFP_Time);
 	g_iRollTime = GetConVarInt(g_cvRoll_Time);
+	g_iInactiveStrikes = GetConVarInt(g_cvInactive_Strikes);
 	
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
@@ -350,6 +357,10 @@ public void ConvarChanged_WFP_Time(Handle hConvar, const char[] sOldVal, const c
 
 public void ConvarChanged_Roll_Time(Handle hConvar, const char[] sOldVal, const char[] sNewVal) {
 	g_iRollTime = StringToInt(sNewVal);
+}
+
+public void ConvarChanged_Inactive_Strikes(Handle hConvar, const char[] sOldVal, const char[] sNewVal) {
+	g_iInactiveStrikes = StringToInt(sNewVal);
 }
 
 public void OnMapStart()
@@ -1194,6 +1205,21 @@ stock void Bowl_RemovePlayer(int iClient)
 		case 2: g_bPlayerSelected_Lane2 = false, g_iCurrentPlayer_Party2 = 0;
 	}
 	
+	if (GetEntProp(GetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1") >= 2)
+	{
+		if (g_iInactiveStrikes - g_iStrikes[iClient] > 0)
+		{
+			g_iStrikes[iClient]++;
+			PrintToChat(iClient, "\x07FF4040You did not roll this round. You will be kicked from this lane if you idle for %i more frames.", g_iInactiveStrikes - g_iStrikes[iClient]);
+		}
+		
+		else
+		{
+			PrintToChat(iClient, "\x07FF4040You have been kicked from Lane %i due to inactivity.", g_iParty[iClient]);
+			Command_Leave(iClient, 0);
+		}
+	}
+	
 	CreateTimer(1.7, Bowl_TeleportOutside, iClient, TIMER_FLAG_NO_MAPCHANGE);
 	TF2_RemoveCondition(iClient, TFCond_HalloweenCritCandy);
 }
@@ -1720,8 +1746,8 @@ stock void Bowl_ResetPlayer(int iClient)
 	
 	g_iScore[iClient] = 0;
 	g_iReady[iClient] = 0;
-	
 	g_bRolled[iClient] = false;
+	g_iStrikes[iClient] = 0;
 	
 	if (iClient == g_iCurrentPlayer_Party1 || iClient == g_iCurrentPlayer_Party2)
 		Bowl_RemovePlayer(iClient);
@@ -1856,6 +1882,7 @@ public Action Bowl_EndSession(Handle hTimer, int iLane)
 			g_iParty[iClient] = 0;
 			g_iReady[iClient] = 0;
 			g_iScore[iClient] = 0;
+			g_iStrikes[iClient] = 0;
 			
 			char sName[MAX_NAME_LENGTH];
 			int iParticle = CreateEntityByName("info_particle_system");
