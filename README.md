@@ -60,10 +60,11 @@
 
 ### ConVars
 | ConVar               | Description                                                                             | Default Value | Minimum Value | Maximum Value |
-|----------------------|-----------------------------------------------------------------------------------------|---------------|---------------|---------------|
-| `bowling_maxplayers` | Sets the maximum players per lane.                                                      | 6             | 1             | 1             |
-| `bowling_wfp_time`   | Sets the maximum waiting for players time.                                              | 120           | 10            | 600           |
-| `bowling_roll_time`  | Sets the maximum time allowed for players to roll their ball. Prevents a troll delaying | 10            | 50            | 60            |
+|-----------------------------|------------------------------------------------------------------------------------------|--------------|---------------|---------------|
+| `bowling_maxplayers`        | Sets the maximum players per lane.                                                       | 6             | 1             | 1             |
+| `bowling_wfp_time`          | Sets the maximum waiting for players time.                                               | 120           | 10            | 600           |
+| `bowling_roll_time`         | Sets the maximum time allowed for players to roll their ball. Prevents a troll delaying. | 10            | 50            | 60            |
+| `bowling_inactive_strikes`  | Sets the number of inactive strikes before the player is kicked from idling.             | 3            | 1             | 10            |
 
 ### Map Configuration
 ---
