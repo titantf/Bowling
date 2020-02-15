@@ -1352,6 +1352,9 @@ stock void Bowl_UpdateLane(int iLane)
 	{
 		if (g_iPlayers_Party1 == 0)
 		{
+			if (g_bMatch_Party1)
+				PrintToChatAll("\x07ADFF2FThe session on Lane 1 has just ended. The lane is now open.");
+				
 			g_bMatch_Party1 = false;
 			
 			g_iFrame_Lane1 = 0;
@@ -1359,8 +1362,6 @@ stock void Bowl_UpdateLane(int iLane)
 			g_iRemaining_Party1 = 0;
 			
 			g_bPlayerSelected_Lane1 = false;
-			
-			PrintToChatAll("\x07ADFF2FThe session on Lane 1 has just ended. The lane is now open.");
 		}
 	}
 	
@@ -1368,6 +1369,9 @@ stock void Bowl_UpdateLane(int iLane)
 	{
 		if (g_iPlayers_Party2 == 0)
 		{
+			if (g_bMatch_Party2)
+				PrintToChatAll("\x07ADFF2FThe session on Lane 2 has just ended. The lane is now open.");
+				
 			g_bMatch_Party2 = false;
 			
 			g_iFrame_Lane2 = 0;
@@ -1375,8 +1379,6 @@ stock void Bowl_UpdateLane(int iLane)
 			g_iRemaining_Party2 = 0;
 			
 			g_bPlayerSelected_Lane2 = false;
-			
-			PrintToChatAll("\x07ADFF2FThe session on Lane 2 has just ended. The lane is now open.");
 		}
 	}
 }
