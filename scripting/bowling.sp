@@ -22,7 +22,23 @@ bool bSteamTools;
 
 #define SOUND_ROLL 	"bowling/roll.wav"
 #define SOUND_HIT 	"bowling/hit.wav"
-	
+
+#define SOUND_TELEPORT_PLAYING	"weapons/teleporter_receive.wav"
+#define SOUND_TELEPORT_EXIT		"weapons/teleporter_send.wav"
+
+#define SOUND_COUNTDOWN_1SEC	"vo/announcer_begins_1sec.mp3"
+#define SOUND_COUNTDOWN_2SEC	"vo/announcer_begins_2sec.mp3"
+#define SOUND_COUNTDOWN_3SEC	"vo/announcer_begins_3sec.mp3"
+#define SOUND_COUNTDOWN_4SEC	"vo/announcer_begins_4sec.mp3"
+#define SOUND_COUNTDOWN_5SEC	"vo/announcer_begins_5sec.mp3"
+#define SOUND_COUNTDOWN_10SEC	"vo/announcer_begins_10sec.mp3"
+#define SOUND_COUNTDOWN_START	"vo/announcer_am_gamestarting04.mp3"
+
+#define SOUND_CHEER1			"ambient_mp3/bumper_car_cheer1.mp3"
+#define SOUND_CHEER2			"ambient_mp3/bumper_car_cheer2.mp3"
+#define SOUND_CHEER3			"ambient_mp3/bumper_car_cheer3.mp3"
+#define SOUND_CHEERSPECIAL		"passtime/crowd_cheer.wav"
+
 ConVar
 	g_cvMaxPlayers,
 	g_cvWFP_Time,
@@ -33,9 +49,12 @@ Handle
 	g_hHud_Party2,
 	
 	g_hHud_Score,
+	g_hHud_Bowls,
 	
 	g_hHud_Frame,
-	g_hHud_Notifications;
+	g_hHud_Notifications,
+	
+	g_hTeleportTimer[3];
 	
 int
 	g_iMaxPlayers,
@@ -158,6 +177,7 @@ public void OnPluginStart()
 	g_hHud_Party1 = CreateHudSynchronizer();
 	g_hHud_Party2 = CreateHudSynchronizer()
 	g_hHud_Score = CreateHudSynchronizer();
+	g_hHud_Bowls = CreateHudSynchronizer();
 	g_hHud_Frame = CreateHudSynchronizer();
 	g_hHud_Notifications = CreateHudSynchronizer();
 	
@@ -302,6 +322,9 @@ public void OnPluginStart()
 	
 	else
 		LogError("No configs were found for this map.");
+		
+	Bowl_ConnectPins();
+	PrecacheServer();
 }
 
 public void OnPluginEnd()
@@ -366,9 +389,6 @@ public void OnMapStart()
 	SetConVarInt(FindConVar("mp_autoteambalance"), 0, true, false);
 	SetConVarInt(FindConVar("mp_teams_unbalance_limit"), 0, true, false);
 	
-	Bowl_ConnectPins();
-	PrecacheServer();
-	
 	g_iAlpha = 255;
 	g_iAlpha_Add = false;
 	
@@ -432,8 +452,14 @@ public Action Event_PlayerDeathPost(Handle hEvent, const char[] sEventName, bool
 			g_iScore[iAttacker]++;
 			
 			EmitSoundToAll(SOUND_HIT, iClient);
-			ChangeClientTeam(iClient, 1);
+			switch (GetRandomInt(1, 3))
+			{
+				case 1: EmitSoundToAll(SOUND_CHEER1, iClient), EmitSoundToAll(SOUND_CHEER1, iClient), EmitSoundToAll(SOUND_CHEER1, iClient);
+				case 2: EmitSoundToAll(SOUND_CHEER2, iClient), EmitSoundToAll(SOUND_CHEER2, iClient), EmitSoundToAll(SOUND_CHEER2, iClient);
+				case 3: EmitSoundToAll(SOUND_CHEER3, iClient), EmitSoundToAll(SOUND_CHEER3, iClient), EmitSoundToAll(SOUND_CHEER3, iClient);
+			}
 			
+			ChangeClientTeam(iClient, 1);
 			switch (g_iParty[iAttacker])
 			{
 				case 1:
@@ -444,12 +470,18 @@ public Action Event_PlayerDeathPost(Handle hEvent, const char[] sEventName, bool
 						{
 							PrintToChatAll("\x075885A2%N \x07FFFFFFscored a \x07CF6A32STRIKE\x07FFFFFF!", iAttacker);
 							ShowSyncHudText_Notification(iAttacker, "S T R I K E", "strike");
+							
+							EmitSoundToClient(iAttacker, SOUND_CHEERSPECIAL);
+							EmitSoundToAll(SOUND_CHEERSPECIAL, iAttacker);
 						}
 						
 						else if (GetEntProp(GetEntPropEnt(iAttacker, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1") == 0)
 						{
 							PrintToChatAll("\x075885A2%N \x07FFFFFFscored a \x07FFD700SPARE\x07FFFFFF!", iAttacker);
 							ShowSyncHudText_Notification(iAttacker, "S P A R E", "spare");
+							
+							EmitSoundToClient(iAttacker, SOUND_CHEERSPECIAL);
+							EmitSoundToAll(SOUND_CHEERSPECIAL, iAttacker);
 						}
 						
 						Bowl_RemovePlayer(iAttacker);
@@ -464,12 +496,18 @@ public Action Event_PlayerDeathPost(Handle hEvent, const char[] sEventName, bool
 						{
 							PrintToChatAll("\x075885A2%N \x07FFFFFFscored a \x07CF6A32STRIKE\x07FFFFFF!", iAttacker);
 							ShowSyncHudText_Notification(iAttacker, "S T R I K E", "strike");
+							
+							EmitSoundToClient(iAttacker, SOUND_CHEERSPECIAL);
+							EmitSoundToAll(SOUND_CHEERSPECIAL, iAttacker);
 						}
 						
 						else if (GetEntProp(GetEntPropEnt(iAttacker, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1") == 0)
 						{
 							PrintToChatAll("\x075885A2%N \x07FFFFFFscored a \x07FFD700SPARE\x07FFFFFF!", iAttacker);
 							ShowSyncHudText_Notification(iAttacker, "S P A R E", "spare");
+							
+							EmitSoundToClient(iAttacker, SOUND_CHEERSPECIAL);
+							EmitSoundToAll(SOUND_CHEERSPECIAL, iAttacker);
 						}
 						
 						Bowl_RemovePlayer(iAttacker);
@@ -593,15 +631,24 @@ public Action Timer_RightPanel(Handle hTimer)
 {
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (g_iParty[i] == 0 && IsClientConnected(i))
+		if (IsValidClient(i))
 		{
-			char sFormat[256];
-			Format(sFormat, sizeof(sFormat), "Lane 1\n%i/%i %s\n \nLane 2\n%i/%i %s", g_iPlayers_Party1, g_iMaxPlayers, (g_bMatch_Party1 == true ? "(Locked)" : "(Open)"), g_iPlayers_Party2, g_iMaxPlayers, (g_bMatch_Party2 == true ? "(Locked)" : "(Open)"));
+			if (g_iParty[i] == 0)
+			{
+				char sFormat[256];
+				Format(sFormat, sizeof(sFormat), "Lane 1\n%i/%i %s\n \nLane 2\n%i/%i %s", g_iPlayers_Party1, g_iMaxPlayers, (g_bMatch_Party1 == true ? "(Locked)" : "(Open)"), g_iPlayers_Party2, g_iMaxPlayers, (g_bMatch_Party2 == true ? "(Locked)" : "(Open)"));
+				
+				Handle hBuffer = StartMessageOne("KeyHintText", i);
+				BfWriteByte(hBuffer, 1);
+				BfWriteString(hBuffer, sFormat);
+				EndMessage();
+			}
 			
-			Handle hBuffer = StartMessageOne("KeyHintText", i);
-			BfWriteByte(hBuffer, 1);
-			BfWriteString(hBuffer, sFormat);
-			EndMessage();
+			else if (i == g_iCurrentPlayer_Party1 || i == g_iCurrentPlayer_Party2)
+			{			
+				SetHudTextParams(-1.0, 0.58, 1.0, 255, 255, 255, 255);
+				ShowSyncHudText(i, g_hHud_Bowls, "Bowls Left: %i", GetEntProp(GetEntPropEnt(i, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1"));
+			}
 		}
 	}
 }
@@ -852,8 +899,22 @@ public Action Timer_Countdown_Party1(Handle hTimer)
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (IsValidClient(i))
+		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == 1)
+			{
 				ShowSyncHudText(i, g_hHud_Party1, "%i", g_iRemaining_Party1);
+				switch (g_iRemaining_Party1)
+				{
+					case 0: EmitSoundToClient(i, SOUND_COUNTDOWN_START);
+					case 1: EmitSoundToClient(i, SOUND_COUNTDOWN_1SEC);
+					case 2: EmitSoundToClient(i, SOUND_COUNTDOWN_2SEC);
+					case 3: EmitSoundToClient(i, SOUND_COUNTDOWN_3SEC);
+					case 4: EmitSoundToClient(i, SOUND_COUNTDOWN_4SEC);
+					case 5: EmitSoundToClient(i, SOUND_COUNTDOWN_5SEC);
+					case 9: EmitSoundToClient(i, SOUND_COUNTDOWN_10SEC);
+				}
+			}
+		}
 	}
 	
 	return Plugin_Continue;
@@ -878,8 +939,22 @@ public Action Timer_Countdown_Party2(Handle hTimer)
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (IsValidClient(i))
+		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == 2)
+			{
 				ShowSyncHudText(i, g_hHud_Party2, "%i", g_iRemaining_Party2);
+				switch (g_iRemaining_Party2)
+				{
+					case 0: EmitSoundToClient(i, SOUND_COUNTDOWN_START);
+					case 1: EmitSoundToClient(i, SOUND_COUNTDOWN_1SEC);
+					case 2: EmitSoundToClient(i, SOUND_COUNTDOWN_2SEC);
+					case 3: EmitSoundToClient(i, SOUND_COUNTDOWN_3SEC);
+					case 4: EmitSoundToClient(i, SOUND_COUNTDOWN_4SEC);
+					case 5: EmitSoundToClient(i, SOUND_COUNTDOWN_5SEC);
+					case 9: EmitSoundToClient(i, SOUND_COUNTDOWN_10SEC);
+				}
+			}
+		}
 	}
 	
 	return Plugin_Continue;
@@ -1319,7 +1394,7 @@ stock void Bowl_ShowScores(int iLane)
 			else
 				Format(sFormatScores, sizeof(sFormatScores), "%s \n \n", sFormatScores);
 				
-			Format(sFormatScores, sizeof(sFormatScores), "%sFrame %i/10\n", sFormatScores, g_iFrame_Lane1);
+			Format(sFormatScores, sizeof(sFormatScores), "%sFrame %i/10\n", sFormatScores, (g_iFrame_Lane1 > 10) ? 10 : g_iFrame_Lane1);
 			
 			for (int i = 0; i < g_iFrame_Lane1; i++)
 				StrCat(sFormatScores, sizeof(sFormatScores), "▬");
@@ -1337,7 +1412,7 @@ stock void Bowl_ShowScores(int iLane)
 			else
 				Format(sFormatScores, sizeof(sFormatScores), "%s \n \n", sFormatScores);
 				
-			Format(sFormatScores, sizeof(sFormatScores), "%sFrame %i/10\n", sFormatScores, g_iFrame_Lane2);
+			Format(sFormatScores, sizeof(sFormatScores), "%sFrame %i/10\n", sFormatScores, (g_iFrame_Lane2 > 10) ? 10 : g_iFrame_Lane2);
 			
 			for (int i = 0; i < g_iFrame_Lane2; i++)
 				StrCat(sFormatScores, sizeof(sFormatScores), "▬");
@@ -1396,8 +1471,14 @@ stock bool Bowl_SelectPlayer(int iLane, int iFrame)
 				
 				bChosen = true;
 				g_bRolled[i] = true;
-		
-				CreateTimer(3.0, Timer_TeleportPlayer, i, TIMER_FLAG_NO_MAPCHANGE);
+				
+				if (g_hTeleportTimer[iLane] != INVALID_HANDLE)
+				{
+					KillTimer(g_hTeleportTimer[iLane], false);
+					g_hTeleportTimer[iLane] = INVALID_HANDLE;
+				}
+				
+				g_hTeleportTimer[iLane] = CreateTimer(3.0, Timer_TeleportPlayer, i, TIMER_FLAG_NO_MAPCHANGE);
 				break;
 			}
 		}
@@ -1431,12 +1512,18 @@ stock bool Bowl_SelectPlayer(int iLane, int iFrame)
 
 public Action Timer_TeleportPlayer(Handle hTimer, int iClient)
 {
+	g_hTeleportTimer[g_iParty[iClient]] = INVALID_HANDLE;
 	StripWeapons(iClient);
+	
 	switch (g_iParty[iClient])
 	{
 		case 1: g_iCurrentPlayer_Party1 = iClient, Bowl_TeleportToLane(iClient, 1), TeleportPins(1), Bowl_GiveLooseCannon(iClient, g_iFrame_Lane1);
 		case 2: g_iCurrentPlayer_Party2 = iClient, Bowl_TeleportToLane(iClient, 2), TeleportPins(2), Bowl_GiveLooseCannon(iClient, g_iFrame_Lane2);
 	}
+	
+	EmitSoundToAll(SOUND_TELEPORT_PLAYING, iClient);
+	EmitSoundToAll(SOUND_TELEPORT_PLAYING, iClient);
+	Bowl_TeleportParticle(iClient, true);
 }
 
 stock void Bowl_GiveLooseCannon(int iClient, int iFrame)
@@ -1539,6 +1626,10 @@ public Action Bowl_TeleportOutside(Handle hTimer, int iClient)
 	{
 		TeleportEntity(iClient, flPos, NULL_VECTOR, NULL_VECTOR);
 		TF2_RegeneratePlayer(iClient);
+		
+		EmitSoundToAll(SOUND_TELEPORT_EXIT, iClient);
+		EmitSoundToAll(SOUND_TELEPORT_EXIT, iClient);
+		Bowl_TeleportParticle(iClient, false);
 	}
 	
 	SetEntProp(iClient, Prop_Send, "m_bDrawViewmodel", 1);
@@ -1740,7 +1831,37 @@ public Action Bowl_EndSession(Handle hTimer, int iLane)
 			g_iReady[iClient] = 0;
 			g_iScore[iClient] = 0;
 			
+			char sName[MAX_NAME_LENGTH];
+			int iParticle = CreateEntityByName("info_particle_system");
+			if (IsValidEntity(iParticle))
+			{
+				float flPosition[3];
+				GetEntPropVector(iClient, Prop_Data, "m_vecAbsOrigin", flPosition);
+				flPosition[2] += 25.0;
+				
+				TeleportEntity(iParticle, flPosition, NULL_VECTOR, NULL_VECTOR);
+				GetEntPropString(iClient, Prop_Data, "m_iName", sName, sizeof(sName));
+				
+				DispatchKeyValue(iParticle, "targetname", "confetti_endmatch");
+				DispatchKeyValue(iParticle, "parentname", sName);
+				DispatchKeyValue(iParticle, "effect_name", "bday_confetti");
+				DispatchSpawn(iParticle);
+				SetVariantString(sName);
+				
+				AcceptEntityInput(iParticle, "SetParent", iParticle, iParticle, 0);
+				ActivateEntity(iParticle);
+				AcceptEntityInput(iParticle, "start");
+				
+				CreateTimer(3.0, Timer_DeleteParticles, iParticle, TIMER_FLAG_NO_MAPCHANGE);
+			}
+			
+			else
+				LogError("[ERROR] Particle system failed to create (missing particle name/doesn't exist)");
+				
 			PrintToChat(iClient, "\x07FFFFFFYou left Lane %i.", iLane);
+			EmitSoundToClient(iClient, SOUND_CHEERSPECIAL);
+			EmitSoundToAll(SOUND_CHEERSPECIAL, iClient);
+			EmitSoundToAll(SOUND_CHEERSPECIAL, iClient);
 		}
 	}
 	
@@ -1749,7 +1870,7 @@ public Action Bowl_EndSession(Handle hTimer, int iLane)
 
 stock void Bowl_ConnectPins()
 {	
-	ServerCommand("sv_cheats 1; bot kick all; bot -team red -class medic -name Pin#1; bot -team red -class medic -name Pin#2; bot -team red -class medic -name Pin#3; bot -team red -class medic -name Pin#4; bot -team red -class medic -name Pin#5; bot -team red -class medic -name Pin#6;");
+	ServerCommand("sv_cheats 1; bot_kick all; bot -team red -class medic -name Pin#1; bot -team red -class medic -name Pin#2; bot -team red -class medic -name Pin#3; bot -team red -class medic -name Pin#4; bot -team red -class medic -name Pin#5; bot -team red -class medic -name Pin#6;");
 	ServerCommand("bot -team red -class medic -name Pin#7; bot -team red -class medic -name Pin#8; bot -team red -class medic -name Pin#9; bot -team red -class medic -name Pin#10");
 	
 	ServerCommand("bot -team red -class medic -name Pin#11; bot -team red -class medic -name Pin#12; bot -team red -class medic -name Pin#13; bot -team red -class medic -name Pin#14; bot -team red -class medic -name Pin#15; bot -team red -class medic -name Pin#16;");
@@ -2000,6 +2121,37 @@ stock bool Bowl_CheckPins(int iLane)
 	return true;
 }
 
+stock void Bowl_TeleportParticle(int iClient, bool bIn)
+{
+	char sName[MAX_NAME_LENGTH];
+	
+	int iParticle = CreateEntityByName("info_particle_system");
+	if (IsValidEntity(iParticle))
+	{
+		float flPosition[3];
+		GetEntPropVector(iClient, Prop_Data, "m_vecAbsOrigin", flPosition);
+		flPosition[2] += 25.0;
+		
+		TeleportEntity(iParticle, flPosition, NULL_VECTOR, NULL_VECTOR);
+		GetEntPropString(iClient, Prop_Data, "m_iName", sName, sizeof(sName));
+		
+		DispatchKeyValue(iParticle, "targetname", "player_teleported");
+		DispatchKeyValue(iParticle, "parentname", sName);
+		DispatchKeyValue(iParticle, "effect_name", (bIn) ? "teleportedin_blue" : "teleported_blue");
+		DispatchSpawn(iParticle);
+		SetVariantString(sName);
+		
+		AcceptEntityInput(iParticle, "SetParent", iParticle, iParticle, 0);
+		ActivateEntity(iParticle);
+		AcceptEntityInput(iParticle, "start");
+		
+		CreateTimer(3.0, Timer_DeleteParticles, iParticle, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
+	else
+		LogError("[ERROR] Particle system failed to create (missing particle name/doesn't exist)");
+}
+
 stock void PrecacheServer()
 {
 	char sFormat[PLATFORM_MAX_PATH];
@@ -2012,6 +2164,22 @@ stock void PrecacheServer()
 	
 	PrecacheSound(SOUND_HIT, true);
 	PrecacheSound(SOUND_ROLL, true);
+	
+	PrecacheSound(SOUND_TELEPORT_PLAYING, true);
+	PrecacheSound(SOUND_TELEPORT_EXIT, true);
+	
+	PrecacheSound(SOUND_COUNTDOWN_1SEC, true);
+	PrecacheSound(SOUND_COUNTDOWN_2SEC, true);
+	PrecacheSound(SOUND_COUNTDOWN_3SEC, true);
+	PrecacheSound(SOUND_COUNTDOWN_4SEC, true);
+	PrecacheSound(SOUND_COUNTDOWN_5SEC, true);
+	PrecacheSound(SOUND_COUNTDOWN_10SEC, true);
+	PrecacheSound(SOUND_COUNTDOWN_START, true);
+	
+	PrecacheSound(SOUND_CHEER1, true);
+	PrecacheSound(SOUND_CHEER2, true);
+	PrecacheSound(SOUND_CHEER3, true);
+	PrecacheSound(SOUND_CHEERSPECIAL, true);
 }
 
 stock void StripWeapons(int iClient)
@@ -2047,6 +2215,18 @@ stock bool IsFlagSet(int iClient, int iFlag)
 		return true;
 		
 	return false;
+}
+
+public Action Timer_DeleteParticles(Handle hTimer, int iParticle)
+{
+	if (iParticle > 0 && IsValidEntity(iParticle))
+	{
+		char sClassname[64];
+		GetEntityClassname(iParticle, sClassname, sizeof(sClassname));
+		
+		if (StrEqual(sClassname, "info_particle_system", false))
+			AcceptEntityInput(iParticle, "Kill");
+	}
 }
 
 stock bool IsValidClient(int iClient, bool bReplay = true)
