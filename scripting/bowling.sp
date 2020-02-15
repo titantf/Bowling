@@ -633,21 +633,25 @@ public Action Timer_RightPanel(Handle hTimer)
 	{
 		if (IsValidClient(i))
 		{
-			if (g_iParty[i] == 0)
+			// player is not in scoreboard
+			if (!(GetClientButtons(i) & IN_SCORE))
 			{
-				char sFormat[256];
-				Format(sFormat, sizeof(sFormat), "Lane 1\n%i/%i %s\n \nLane 2\n%i/%i %s", g_iPlayers_Party1, g_iMaxPlayers, (g_bMatch_Party1 == true ? "(Locked)" : "(Open)"), g_iPlayers_Party2, g_iMaxPlayers, (g_bMatch_Party2 == true ? "(Locked)" : "(Open)"));
+				if (g_iParty[i] == 0)
+				{
+					char sFormat[256];
+					Format(sFormat, sizeof(sFormat), "Lane 1\n%i/%i %s\n \nLane 2\n%i/%i %s", g_iPlayers_Party1, g_iMaxPlayers, (g_bMatch_Party1 == true ? "(Locked)" : "(Open)"), g_iPlayers_Party2, g_iMaxPlayers, (g_bMatch_Party2 == true ? "(Locked)" : "(Open)"));
+					
+					Handle hBuffer = StartMessageOne("KeyHintText", i);
+					BfWriteByte(hBuffer, 1);
+					BfWriteString(hBuffer, sFormat);
+					EndMessage();
+				}
 				
-				Handle hBuffer = StartMessageOne("KeyHintText", i);
-				BfWriteByte(hBuffer, 1);
-				BfWriteString(hBuffer, sFormat);
-				EndMessage();
-			}
-			
-			else if (i == g_iCurrentPlayer_Party1 || i == g_iCurrentPlayer_Party2)
-			{			
-				SetHudTextParams(-1.0, 0.58, 1.0, 255, 255, 255, 255);
-				ShowSyncHudText(i, g_hHud_Bowls, "Bowls Left: %i", GetEntProp(GetEntPropEnt(i, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1"));
+				else if (i == g_iCurrentPlayer_Party1 || i == g_iCurrentPlayer_Party2)
+				{			
+					SetHudTextParams(-1.0, 0.58, 1.0, 255, 255, 255, 255);
+					ShowSyncHudText(i, g_hHud_Bowls, "Bowls Left: %i", GetEntProp(GetEntPropEnt(i, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1"));
+				}
 			}
 		}
 	}
@@ -788,29 +792,33 @@ public Action Timer_WaitingForPlayers_Party1(Handle hTimer)
 		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == 1)
 			{
-				ShowSyncHudText(i, g_hHud_Party1, "\n \nLane 1\n \nWaiting for Players.. (%i)\n \n \n \n \n \nThe match will start automatically when there are %i players\nor when everyone is ready.", g_iRemaining_Party1, g_iMaxPlayers);
-				
-				char sFormat[512];
-				for (int j = 1; j <= MaxClients; j++)
+				// player is not in scoreboard
+				if (!(GetClientButtons(i) & IN_SCORE))
 				{
-					if (IsValidClient(j))
+					ShowSyncHudText(i, g_hHud_Party1, "\n \nLane 1\n \nWaiting for Players.. (%i)\n \n \n \n \n \nThe match will start automatically when there are %i players\nor when everyone is ready.", g_iRemaining_Party1, g_iMaxPlayers);
+					
+					char sFormat[512];
+					for (int j = 1; j <= MaxClients; j++)
 					{
-						if (!IsFakeClient(j) && g_iParty[j] == 1)
+						if (IsValidClient(j))
 						{
-							if (g_iReady[j])
-								Format(sFormat, sizeof(sFormat), "%s%N ✔\n", sFormat, j);
-							else
-								Format(sFormat, sizeof(sFormat), "%s%N\n", sFormat, j);
+							if (!IsFakeClient(j) && g_iParty[j] == 1)
+							{
+								if (g_iReady[j])
+									Format(sFormat, sizeof(sFormat), "%s%N ✔\n", sFormat, j);
+								else
+									Format(sFormat, sizeof(sFormat), "%s%N\n", sFormat, j);
+							}
 						}
 					}
+					
+					Format(sFormat, sizeof(sFormat), "%s\n \n!r - Ready\n!leave - Leave", sFormat);
+					
+					Handle hBuffer = StartMessageOne("KeyHintText", i);
+					BfWriteByte(hBuffer, 1);
+					BfWriteString(hBuffer, sFormat);
+					EndMessage();
 				}
-				
-				Format(sFormat, sizeof(sFormat), "%s\n \n!r - Ready\n!leave - Leave", sFormat);
-				
-				Handle hBuffer = StartMessageOne("KeyHintText", i);
-				BfWriteByte(hBuffer, 1);
-				BfWriteString(hBuffer, sFormat);
-				EndMessage();
 			}
 		}
 	}
@@ -848,29 +856,33 @@ public Action Timer_WaitingForPlayers_Party2(Handle hTimer)
 		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == 2)
 			{
-				ShowSyncHudText(i, g_hHud_Party2, "\n \nLane 2\n \nWaiting for Players.. (%i)\n \n \n \n \n \nThe match will start automatically when there are %i players\nor when everyone is ready.", g_iRemaining_Party2, g_iMaxPlayers);
-				
-				char sFormat[256];
-				for (int j = 1; j <= MaxClients; j++)
+				// player is not in scoreboard
+				if (!(GetClientButtons(i) & IN_SCORE))
 				{
-					if (IsValidClient(j))
+					ShowSyncHudText(i, g_hHud_Party2, "\n \nLane 2\n \nWaiting for Players.. (%i)\n \n \n \n \n \nThe match will start automatically when there are %i players\nor when everyone is ready.", g_iRemaining_Party2, g_iMaxPlayers);
+					
+					char sFormat[256];
+					for (int j = 1; j <= MaxClients; j++)
 					{
-						if (!IsFakeClient(j) && g_iParty[j] == 2)
+						if (IsValidClient(j))
 						{
-							if (g_iReady[j])
-								Format(sFormat, sizeof(sFormat), "%s%N ✔\n", sFormat, j);
-							else
-								Format(sFormat, sizeof(sFormat), "%s%N\n", sFormat, j);
+							if (!IsFakeClient(j) && g_iParty[j] == 2)
+							{
+								if (g_iReady[j])
+									Format(sFormat, sizeof(sFormat), "%s%N ✔\n", sFormat, j);
+								else
+									Format(sFormat, sizeof(sFormat), "%s%N\n", sFormat, j);
+							}
 						}
 					}
+					
+					Format(sFormat, sizeof(sFormat), "%s\n \n!r - Ready\n!leave - Leave", sFormat);
+					
+					Handle hBuffer = StartMessageOne("KeyHintText", i);
+					BfWriteByte(hBuffer, 1);
+					BfWriteString(hBuffer, sFormat);
+					EndMessage();
 				}
-				
-				Format(sFormat, sizeof(sFormat), "%s\n \n!r - Ready\n!leave - Leave", sFormat);
-				
-				Handle hBuffer = StartMessageOne("KeyHintText", i);
-				BfWriteByte(hBuffer, 1);
-				BfWriteString(hBuffer, sFormat);
-				EndMessage();
 			}
 		}
 	}
@@ -902,16 +914,20 @@ public Action Timer_Countdown_Party1(Handle hTimer)
 		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == 1)
 			{
-				ShowSyncHudText(i, g_hHud_Party1, "%i", g_iRemaining_Party1);
-				switch (g_iRemaining_Party1)
+				// player is not in scoreboard
+				if (!(GetClientButtons(i) & IN_SCORE))
 				{
-					case 0: EmitSoundToClient(i, SOUND_COUNTDOWN_START);
-					case 1: EmitSoundToClient(i, SOUND_COUNTDOWN_1SEC);
-					case 2: EmitSoundToClient(i, SOUND_COUNTDOWN_2SEC);
-					case 3: EmitSoundToClient(i, SOUND_COUNTDOWN_3SEC);
-					case 4: EmitSoundToClient(i, SOUND_COUNTDOWN_4SEC);
-					case 5: EmitSoundToClient(i, SOUND_COUNTDOWN_5SEC);
-					case 9: EmitSoundToClient(i, SOUND_COUNTDOWN_10SEC);
+					ShowSyncHudText(i, g_hHud_Party1, "%i", g_iRemaining_Party1);
+					switch (g_iRemaining_Party1)
+					{
+						case 0: EmitSoundToClient(i, SOUND_COUNTDOWN_START);
+						case 1: EmitSoundToClient(i, SOUND_COUNTDOWN_1SEC);
+						case 2: EmitSoundToClient(i, SOUND_COUNTDOWN_2SEC);
+						case 3: EmitSoundToClient(i, SOUND_COUNTDOWN_3SEC);
+						case 4: EmitSoundToClient(i, SOUND_COUNTDOWN_4SEC);
+						case 5: EmitSoundToClient(i, SOUND_COUNTDOWN_5SEC);
+						case 9: EmitSoundToClient(i, SOUND_COUNTDOWN_10SEC);
+					}
 				}
 			}
 		}
@@ -942,16 +958,20 @@ public Action Timer_Countdown_Party2(Handle hTimer)
 		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == 2)
 			{
-				ShowSyncHudText(i, g_hHud_Party2, "%i", g_iRemaining_Party2);
-				switch (g_iRemaining_Party2)
+				// player is not in scoreboard
+				if (!(GetClientButtons(i) & IN_SCORE))
 				{
-					case 0: EmitSoundToClient(i, SOUND_COUNTDOWN_START);
-					case 1: EmitSoundToClient(i, SOUND_COUNTDOWN_1SEC);
-					case 2: EmitSoundToClient(i, SOUND_COUNTDOWN_2SEC);
-					case 3: EmitSoundToClient(i, SOUND_COUNTDOWN_3SEC);
-					case 4: EmitSoundToClient(i, SOUND_COUNTDOWN_4SEC);
-					case 5: EmitSoundToClient(i, SOUND_COUNTDOWN_5SEC);
-					case 9: EmitSoundToClient(i, SOUND_COUNTDOWN_10SEC);
+					ShowSyncHudText(i, g_hHud_Party2, "%i", g_iRemaining_Party2);
+					switch (g_iRemaining_Party2)
+					{
+						case 0: EmitSoundToClient(i, SOUND_COUNTDOWN_START);
+						case 1: EmitSoundToClient(i, SOUND_COUNTDOWN_1SEC);
+						case 2: EmitSoundToClient(i, SOUND_COUNTDOWN_2SEC);
+						case 3: EmitSoundToClient(i, SOUND_COUNTDOWN_3SEC);
+						case 4: EmitSoundToClient(i, SOUND_COUNTDOWN_4SEC);
+						case 5: EmitSoundToClient(i, SOUND_COUNTDOWN_5SEC);
+						case 9: EmitSoundToClient(i, SOUND_COUNTDOWN_10SEC);
+					}
 				}
 			}
 		}
@@ -1438,13 +1458,17 @@ stock void Bowl_ShowScores(int iLane)
 		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == iLane)
 			{
-				Handle hBuffer = StartMessageOne("KeyHintText", i);
-				BfWriteByte(hBuffer, 1);
-				BfWriteString(hBuffer, sFormatScores);
-				EndMessage();
-				
-				SetHudTextParams(0.02, 0.02, 1.0, 255, 255, 255, 255);
-				ShowSyncHudText(i, g_hHud_Score, "Score: %i", g_iScore[i]);
+				// player is not in scoreboard
+				if (!(GetClientButtons(i) & IN_SCORE))
+				{
+					Handle hBuffer = StartMessageOne("KeyHintText", i);
+					BfWriteByte(hBuffer, 1);
+					BfWriteString(hBuffer, sFormatScores);
+					EndMessage();
+					
+					SetHudTextParams(0.02, 0.02, 1.0, 255, 255, 255, 255);
+					ShowSyncHudText(i, g_hHud_Score, "Score: %i", g_iScore[i]);
+				}
 			}
 		}
 	}
