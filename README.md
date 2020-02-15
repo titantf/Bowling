@@ -38,6 +38,7 @@
 | Party              | When joining a lane, the match will start after the waiting for players period is over or when everyone in the lane is ready.                                                                                                                                                           |
 | Live Scoreboard    | Scores are tracked throughout a match. The live scores are shown on the right side.                                                                                                                                                                                                     |
 | Strikes and Spares | When a player scores a strike or spare, everyone on the server will be notified!                                                                                                                                                                                                        |
+| Inactive Detection | When a player is AFK, the player will be kicked from a lane automatically if they do not roll for 3 frames.                                                                                                                                                                             |
 | Map Support        | We made supporting other bowling maps as easy as possible. Each map needs a configuration of different coordinates such as the where the pins are in each lane, and where the players are teleported to when they play. You can easily get the coordinates with the built-in commands.  |
 
 ### Commands and ConVars
