@@ -1207,7 +1207,7 @@ stock void Bowl_RemovePlayer(int iClient)
 	
 	if (GetEntProp(GetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon"), Prop_Send, "m_iClip1") >= 2)
 	{
-		if (g_iInactiveStrikes - g_iStrikes[iClient] > 0)
+		if (g_iStrikes[iClient] + 1 < g_iInactiveStrikes)
 		{
 			g_iStrikes[iClient]++;
 			PrintToChat(iClient, "\x07FF4040You did not roll this round. You will be kicked from this lane if you idle for %i more frames.", g_iInactiveStrikes - g_iStrikes[iClient]);
