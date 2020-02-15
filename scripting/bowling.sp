@@ -17,7 +17,7 @@
 bool bSteamTools;
 #endif
 
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 #define HIDEHUD_HEALTH (1 << 3)
 
 #define SOUND_ROLL 	"bowling/roll.wav"
@@ -130,15 +130,6 @@ bool
 	g_bRolled[MAXPLAYERS+1] = false;
 	
 	
-public Plugin myinfo = 
-{
-	name 			= 	"Bowling for TF2",
-	author 			= 	"myst | titan.tf",
-	description 	=	"Brings bowling to TF2. Only works on bowl_ and bowling_ maps.",
-	version 		=	PLUGIN_VERSION,
-	url 			=	"https://titan.tf"
-}
-
 public void OnPluginStart()
 {
 	if (GetEngineVersion() != Engine_TF2)
@@ -2302,4 +2293,13 @@ stock bool IsValidClient(int iClient, bool bReplay = true)
 	if (bReplay && (IsClientSourceTV(iClient) || IsClientReplay(iClient)))
 		return false;
 	return true;
+}
+
+public Plugin myinfo = 
+{
+	name 			= 	"Bowling for TF2",
+	author 			= 	"myst | titan.tf",
+	description 	=	"Brings bowling to TF2. Only works on bowl_ and bowling_ maps.",
+	version 		=	PLUGIN_VERSION,
+	url 			=	"https://titan.tf"
 }
