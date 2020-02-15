@@ -848,7 +848,7 @@ public Action Timer_WaitingForPlayers_Party2(Handle hTimer)
 		{
 			if (!IsFakeClient(i) && GetClientTeam(i) >= 1 && g_iParty[i] == 2)
 			{
-				ShowSyncHudText(i, g_hHud_Party2, "\n \nLane 2\n \nWaiting for players.. (%i)\n \n \n \n \n \nThe match will start automatically when there are %i players\nor when everyone is ready.", g_iRemaining_Party2, g_iMaxPlayers);
+				ShowSyncHudText(i, g_hHud_Party2, "\n \nLane 2\n \nWaiting for Players.. (%i)\n \n \n \n \n \nThe match will start automatically when there are %i players\nor when everyone is ready.", g_iRemaining_Party2, g_iMaxPlayers);
 				
 				char sFormat[256];
 				for (int j = 1; j <= MaxClients; j++)
