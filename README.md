@@ -20,6 +20,8 @@
 
 ### Gamemode
 ---
+
+### Bowling
 | Term   | Description                                                                                      |
 |--------|--------------------------------------------------------------------------------------------------|
 | Strike | When all 10 pins are knocked down with one ball                                                  |
@@ -30,7 +32,6 @@
 | Turkey | Occurs when 3 strikes in a row are bowled                                                        |
 
 ### Features
----
 | Feature            | Description                                                                                                                                                                                                                                                                             |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Skill              | This gamemode requires skills to score strikes and spares. Put your Loose Cannon skills to the test.                                                                                                                                                                                    |
