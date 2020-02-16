@@ -22,14 +22,14 @@
 ---
 
 ### Bowling
-| Term   | Description                                                                                      |
-|--------|--------------------------------------------------------------------------------------------------|
-| Strike | When all 10 pins are knocked down with one ball                                                  |
-| Spare  | All 10 pins are knocked down with 2 consecutive balls                                            |
-| Game   | A game consists of 10 frames per person                                                          |
-| Frame  | A frame consists of up to two deliveries. However the 10th frame consists of up to 3 deliveries. |
-| Double | Occurs when 2 strikes in a row are bowled                                                        |
-| Turkey | Occurs when 3 strikes in a row are bowled                                                        |
+| Term   | Description                                                                                          |
+|--------|------------------------------------------------------------------------------------------------------|
+| Strike | When all 10 pins are knocked down with one ball                                                      |
+| Spare  | All 10 pins are knocked down with 2 consecutive balls                                                |
+| Game   | A game consists of 10 frames per person                                                              |
+| Frame  | A frame consists of up to two deliveries, except that the 10th frame consists of up to 3 deliveries |
+| Double | Occurs when 2 strikes in a row are bowled                                                            |
+| Turkey | Occurs when 3 strikes in a row are bowled                                                            |
 
 ### Features
 | Feature            | Description                                                                                                                                                                                                                                                                             |
