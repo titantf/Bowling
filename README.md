@@ -20,26 +20,29 @@
 
 ### Gamemode
 ---
+Please note that the current scoring system does not simulate the actual scoring systems.
 
 ### Bowling
-| Term   | Description                                                                                          |
-|--------|------------------------------------------------------------------------------------------------------|
-| Strike | When all 10 pins are knocked down with one ball                                                      |
-| Spare  | All 10 pins are knocked down with 2 consecutive balls                                                |
-| Game   | A game consists of 10 frames per person                                                              |
-| Frame  | A frame consists of up to two deliveries, except that the 10th frame consists of up to 3 deliveries |
-| Double | Occurs when 2 strikes in a row are bowled                                                            |
-| Turkey | Occurs when 3 strikes in a row are bowled                                                            |
+| Term        | Description                                                                                          |
+|-------------|------------------------------------------------------------------------------------------------------|
+| Strike      | When all 10 pins are knocked down with one ball                                                      |
+| Spare       | All 10 pins are knocked down with 2 consecutive balls                                                |
+| Game        | A game consists of 10 frames per person                                                              |
+| Frame       | A frame consists of up to two deliveries, except that the 10th frame consists of up to 3 deliveries  |
+| Double      | Occurs when 2 strikes in a row are bowled                                                            |
+| Turkey      | Occurs when 3 strikes in a row are bowled                                                            |
+| Four Bagger | Occurs when 4 strikes in a row are bowled                                                            |
+| x Bagger    | Occurs when x strikes in a row are bowled                                                            |
 
 ### Features
-| Feature            | Description                                                                                                                                                                                                                                                                             |
+| Feature            | Description                                                                                                                                                                                                                                                                              |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Skill              | This gamemode requires skills to score strikes and spares. Put your Loose Cannon skills to the test.                                                                                                                                                                                    |
-| Lanes              | Every map can only support up to 2 lanes. As each lane has 10 pins each, the maximum number of players per server is 12. Each lane will support 6 players. You can only join a lane while a match is not in progress.                                                                   |
-| Party              | When joining a lane, the match will start after the waiting for players period is over or when everyone in the lane is ready.                                                                                                                                                           |
-| Live Scoreboard    | Scores are tracked throughout a match. The live scores are shown on the right side.                                                                                                                                                                                                     |
+| Lanes              | Every map can only support up to 2 lanes. As each lane has 10 pins each, the maximum number of players per server is 12. Each lane will support 6 players. You can only join a lane while a match is not in progress.                                                                    |
+| Party              | When joining a lane, the match will start after the waiting for players period is over or when everyone in the lane is ready.                                                                                                                                                          |
+| Live Scoreboard    | Scores are tracked throughout a match. The live scores are shown on the right side.                                                                                                                                                                                                      |
 | Strikes and Spares | When a player scores a strike or spare, everyone on the server will be notified!                                                                                                                                                                                                        |
-| Inactive Detection | When a player is AFK, the player will be kicked from a lane automatically if they do not roll for 3 frames.                                                                                                                                                                             |
+| Inactive Detection | When a player is AFK, the player will be kicked from a lane automatically if they do not roll for 3 frames.                                                                                                                                                                              |
 | Map Support        | We made supporting other bowling maps as easy as possible. Each map needs a configuration of different coordinates such as the where the pins are in each lane, and where the players are teleported to when they play. You can easily get the coordinates with the built-in commands.  |
 
 ### Commands and ConVars
