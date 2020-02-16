@@ -216,3 +216,8 @@ Use the built in commands sm_teleport and sm_getpos to help you get the coordina
 	}
 }
 ```
+
+### To Do
+---
+- Better point calculation to match real-life bowling point systems
+- Support for only 1 pin config and automatically generate the coordinates for the other 9 pins
