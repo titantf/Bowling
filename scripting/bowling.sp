@@ -406,6 +406,9 @@ public void OnClientPutInServer(int iClient)
 	if (IsValidClient(iClient))
 		if (IsFakeClient(iClient))
 			ChangeClientTeam(iClient, 1);
+			
+	if (!IsFakeClient(iClient))
+		Bowl_VerifyPins();
 }
 
 public void OnClientDisconnect(int iClient) {
@@ -1925,6 +1928,12 @@ public Action Bowl_EndSession(Handle hTimer, int iLane)
 	PrintToChatAll("\x07ADFF2FThe session on Lane %i has just ended. The lane is now open.\n%s", iLane, sFormatChat);
 }
 
+stock void Bowl_VerifyPins()
+{
+	if (GetPinCount() == 0)
+		Bowl_ConnectPins();
+}
+
 stock void Bowl_ConnectPins()
 {	
 	ServerCommand("sv_cheats 1; bot_kick all; bot -team red -class medic -name Pin#1; bot -team red -class medic -name Pin#2; bot -team red -class medic -name Pin#3; bot -team red -class medic -name Pin#4; bot -team red -class medic -name Pin#5; bot -team red -class medic -name Pin#6;");
@@ -2284,6 +2293,18 @@ public Action Timer_DeleteParticles(Handle hTimer, int iParticle)
 		if (StrEqual(sClassname, "info_particle_system", false))
 			AcceptEntityInput(iParticle, "Kill");
 	}
+}
+
+stock int GetPinCount()
+{
+	int iCount;
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsValidClient(i) && IsFakeClient(i))
+			iCount++;
+	}
+	
+	return iCount;
 }
 
 stock bool IsValidClient(int iClient, bool bReplay = true)
